@@ -6,6 +6,8 @@ import { formatPrice, getFinalPrice } from "../utils/price";
 import Loader from "../components/Loader";
 import ErrorMessage from "../components/ErrorMessage";
 import EmptyState from "../components/EmptyState";
+import { useCartDispatch, useCartState } from "../hooks/useCart";
+import { toCartEntry } from "../utils/cart";
 
 export default function ProductPage() {
   const { id } = useParams();
@@ -14,6 +16,8 @@ export default function ProductPage() {
     (signal: AbortSignal) => getProductById(id ?? "", signal),
     [id],
   );
+  const entries = useCartState();
+  const dispatch = useCartDispatch();
   const { data: product, loading, error, reload } = useFetch(fetcher);
 
   if (loading) return <Loader />;
@@ -37,6 +41,8 @@ export default function ProductPage() {
   }
 
   if (!product) return null;
+  const inCart = entries.some((e) => e.productId === product.id);
+  const outOfStock = product.stock === 0;
 
   const finalPrice = getFinalPrice(product);
   const hasDiscount = finalPrice < product.price;
@@ -67,8 +73,18 @@ export default function ProductPage() {
         )}
       </p>
 
-      <button type="button" disabled={product.stock === 0}>
-        {product.stock === 0 ? "Rupture de stock" : "+ Ajouter au panier"}
+      <button
+        type="button"
+        disabled={outOfStock || inCart}
+        onClick={() =>
+          dispatch({ type: "ADD_PRODUCT", entry: toCartEntry(product) })
+        }
+      >
+        {outOfStock
+          ? "Rupture de stock"
+          : inCart
+            ? "Déjà dans mon panier"
+            : "+ Ajouter au panier"}
       </button>
 
       <h2>Description</h2>

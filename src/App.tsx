@@ -6,6 +6,7 @@ import CartPage from "./pages/CartPage";
 import LoginPage from "./pages/LoginPage";
 import NewProductPage from "./pages/NewProductPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
   return (
@@ -15,7 +16,9 @@ export default function App() {
         <Route path="produits/:id" element={<ProductPage />} />
         <Route path="panier" element={<CartPage />} />
         <Route path="connexion" element={<LoginPage />} />
-        <Route path="proposer" element={<NewProductPage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="proposer" element={<NewProductPage />} />
+        </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
